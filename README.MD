@@ -2,9 +2,9 @@
 
 ## Projektidee
 
-- Monitoring-Daten von Router abrufen
-- Geschwindigkeiten & Verfügbarkeit visualisieren
+- Abruf von Energiedaten (Preise und Anteile der Produktionsarten)
+- plotten aller gegeneinander
 
 ## Technische Grundlagen
 
-[api doc](https://fritzconnection.readthedocs.io/en/1.15.0/sources/getting_started.html)
+[api doc](https://api.energy-charts.info)
