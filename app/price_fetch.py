@@ -12,7 +12,7 @@ def build_production_df(data, key_name, value_name, outer_key, index_name):
     df = pd.DataFrame(flat_dict, index=data[index_name])
     return df
 
-sqlite_file = 'data.db'
+sqlite_file = './data/data.db'
 
 sql_connection = sql.connect(sqlite_file)
 sql_cursor = sql_connection.cursor()
