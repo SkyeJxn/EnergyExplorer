@@ -27,7 +27,7 @@ prod_sums = {"Hydro": ['Hydro Run-of-River', 'Hydro water reservoir', 'Hydro pum
 
 unwanted_prod = ['Hydro pumped storage consumption', 'Cross border electricity trading','Load (incl. self-consumption)', 'Residual load', 'Renewable share of load']
 
-last_found = sql_cursor.execute("SELECT MAX(Timestamp) FROM production").fetchone()[0]
+last_found = (sql_cursor.execute("SELECT MAX(Timestamp) FROM production").fetchone()[0])+1
 
 now = int(tm.time())
 
