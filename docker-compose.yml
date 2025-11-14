@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  energy_fetcher:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: energy_fetcher
+    volumes:
+      - ./data:/data
+    environment:
+      - DATABASE_PATH=/db/data.db
+    restart: unless-stopped
