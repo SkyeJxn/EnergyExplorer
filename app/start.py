@@ -32,7 +32,7 @@ def build_data():
 df = build_data()
 
 # UI components
-header = html.H1("Welcome to the Data Visualization Dashboard")
+header = html.H1("Visual Dashboard for Energy Data")
 
 x_options = {"Timestamp":"Timestamp",
             "Ren_share": "Renewable Share of Energy"
