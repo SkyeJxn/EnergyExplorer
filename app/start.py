@@ -4,7 +4,7 @@ import sqlite3 as sql
 import plotly.express as px
 import pandas as pd
 
-#app name (test, prod) and access values
+#app name (test, prod) and socket values
 appName = "test"
 
 socket = {
@@ -41,7 +41,7 @@ x_menu = html.Div(children=[html.Label("x-axis menu"),dcc.Dropdown(x_options, "T
 
 y_options = {"Price": "Price",
             "Production" : "Production",
-            "Renewable Share of Energy": "Ren_share"}
+            "Ren_share": "Renewable Share of Energy"}
 y_menu = html.Div(children=[html.Label("y-axis menu"), dcc.Dropdown(y_options, "Price", id="y-menu")])
 
 graph = dcc.Graph(id="graph")
