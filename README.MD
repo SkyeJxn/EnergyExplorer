@@ -1,10 +1,14 @@
-# DV-Projekt
+# EnergyExplorer
 
-## Projektidee
+## Motivation
 
-- Abruf von Energiedaten (Preise und Anteile der Produktionsarten)
-- plotten aller gegeneinander
 
-## Technische Grundlagen
 
-[api doc](https://api.energy-charts.info)
+## Funktionen & Nutzung:
+
+- Visualisierung von Produktionsdaten
+- Anwählbare datenpunkte:
+    x / y | Produktion nach Typ | Preis | Anteil erneuerbarer Energie
+    ----|---------------------|-------|----------------------------
+    Zeit| Ja | Ja | Ja
+    Anteil Erneuerbarer Energie | Nein | Ja | Nein
