@@ -3,6 +3,7 @@ import os
 import sqlite3 as sql
 import plotly.express as px
 import pandas as pd
+import numpy as np
 
 #app name (test, prod) and socket values
 appName = "test"
@@ -97,8 +98,9 @@ def update_graph(store_data, x_axis, y_axis):
     df_loc = pd.DataFrame(store_data)
 
     if (x_axis == "Ren_share"):
-        if (y_axis == "Price"):
-            fig = px.bar(df_loc, x=x_axis, y=y_axis, title="Correlation of Price and Share of renewable Energy")
+        df_loc["Ren_share"] = pd.to_numeric(df_loc["Ren_share"], errors="coerce")
+        agg = df_loc.groupby("Ren_share", as_index=False)["Price"].mean()
+        fig = px.bar(agg, x="Ren_share", y="Price", title="Correlation of Price and Share of renewable Energy")
     else:
         if (y_axis == "Production"):
             fig = px.line(df_loc, x=x_axis, y=prod_types, title="Energy Production Over Time")
