@@ -4,4 +4,4 @@ WORKDIR /app
 COPY docker/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ ./app/
-CMD ["python" "-m" "webview/start.py"]
+CMD ["python" "app/start.py"]
