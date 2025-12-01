@@ -18,10 +18,4 @@ Das Projekt liefert eine aufbereitete und konsistente Datenbasis aus der Energy-
 
 ## Funktionsdiagramm
 
-:::mermaid
-    flowchart LR
-    API --> Datentransformation
-    Datentransformation --> Datenbank
-    Datenbank --> Visualisierung
-    Visualisierung --> Nutzer
-:::
+![Workflow](Workflow.png)
