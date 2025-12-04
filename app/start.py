@@ -32,7 +32,15 @@ def build_data():
     df["Timestamp"] = pd.to_datetime(df["Timestamp"], unit="s", dayfirst=True, origin="unix")
     return df
 
-df = build_data()
+def serve_layout():
+    df = build_data()
+    initial_store = df.copy()
+    initial_store["Timestamp"] = initial_store["Timestamp"].astype(str)
+    return html.Div([
+        header, refresh_button,
+        dropdowns,
+        dcc.Store(id="df-store", data=initial_store.to_dict("records")), graph])
+    
 
 # UI components
 header = html.Div(html.H1("EnergyExplorer"), className="header")
@@ -54,9 +62,6 @@ dropdowns = html.Div([x_menu, y_menu])
 graph = dcc.Graph(id="graph")
 
 refresh_button = html.Button("Refresh Data", id="rfs-btn")
-
-initial_store = df.copy()
-initial_store["Timestamp"] = initial_store["Timestamp"].astype(str)
 
 # Dash app setup
 
@@ -82,12 +87,10 @@ def restrict_y_menu(x_axis, curr_val):
 )
 
 def refresh_data(n_clicks):
-    if n_clicks:
-        new_df = build_data()
-        new_store = new_df.copy()
-        new_store["Timestamp"] = new_store["Timestamp"].astype(str)
-        return new_store.to_dict("records")
-    return initial_store.to_dict("records")
+    new_df = build_data()
+    new_store = new_df.copy()
+    new_store["Timestamp"] = new_store["Timestamp"].astype(str)
+    return new_store.to_dict("records")
 
 @callback(
     Output("graph", "figure"),
@@ -115,7 +118,7 @@ def update_graph(store_data, x_axis, y_axis):
 
     return fig
 
-app.layout = html.Div([header, refresh_button, dropdowns, dcc.Store(id="df-store", data=initial_store.to_dict("records")), graph])
+app.layout = serve_layout()
 
 if mode == "dev":
     app.run(host=settings["host"], port=settings["port"], debug=settings["debug"])
