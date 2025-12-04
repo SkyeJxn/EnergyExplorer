@@ -9,7 +9,8 @@ services:
     volumes:
       - ./data:/data
     environment:
-      - DATABASE_PATH=//data/data.db
+      - DATABASE_PATH=/data/data.db
+      - APP_MODE=prod
     ports:
       - "8080:8080"
     restart: no
