@@ -9,7 +9,7 @@ services:
     volumes:
       - ./data:/data
     environment:
-      - DATABASE_PATH=/db/data.db
+      - DATABASE_PATH=//data/data.db
     ports:
       - "8080:8080"
-    restart: unless-stopped
+    restart: no
