@@ -1,0 +1,87 @@
+/* Reset some default styles */
+body {
+    background-color: #ffffff;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header styling */
+.header {
+    text-align: center;
+    background-color: #0077b6;
+    color: #fff;
+    padding: 10px 0 8px 0;
+    margin-bottom: 10px;
+    font-size: 2rem;
+    letter-spacing: 1px;
+}
+
+/* Dropdown container */
+.dropdown {
+    display: inline-block;
+    width: 45%;
+    margin: 0 2%;
+    vertical-align: top;
+}
+
+.left {
+    margin-left: 0;
+}
+
+/* Dropdown label styling */
+.dropdown label {
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: block;
+    color: #333;
+}
+
+/* Dropdown select styling */
+.Select-control, .Select {
+    background-color: #e0f7fa !important;
+    border-radius: 6px !important;
+    border: 1px solid #0077b6 !important;
+    color: #333 !important;
+}
+
+/* Button styling */
+button {
+    display: block;
+    margin: 0 auto 24px auto;
+    padding: 10px 24px;
+    background-color: #0077b6;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background-color: #023e8a;
+}
+
+/* Graph styling */
+#graph {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    padding: 16px;
+    margin: 0 auto 32px auto;
+    width: 90%;
+    min-height: 400px;
+}
+
+/* Responsive layout */
+@media (max-width: 800px) {
+    .dropdown {
+        display: block;
+        width: 90%;
+        margin: 12px auto;
+    }
+    #graph {
+        width: 98%;
+    }
+}

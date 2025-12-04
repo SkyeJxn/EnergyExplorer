@@ -6,10 +6,9 @@ import pandas as pd
 import numpy as np
 from waitress import serve
 
-#app name (dev, pre-prod, prod) and socket values
-appName = "dev"
-
+# and socket values
 socket = {
+    "env": "dev", #dev, pre-prod, prod
     "IP": "localhost",
     "Port": 8080
     }
@@ -34,18 +33,22 @@ def build_data():
 df = build_data()
 
 # UI components
-header = html.H1("Visual Dashboard for Energy Data")
+header = html.Div(html.H1("EnergyExplorer"), className="header")
 
+# Dropdown builder
 x_options = {"Timestamp":"Timestamp",
             "Ren_share": "Renewable Share of Energy"
             }
-x_menu = html.Div(children=[html.Label("x-axis menu"),dcc.Dropdown(x_options, "Timestamp", id="x-menu")])
-
 y_options = {"Price": "Price",
             "Production" : "Production",
             "Ren_share": "Renewable Share of Energy"}
-y_menu = html.Div(children=[html.Label("y-axis menu"), dcc.Dropdown(y_options, "Price", id="y-menu")])
 
+x_menu = html.Div(children=[html.Label("x-axis menu"),dcc.Dropdown(x_options, "Timestamp", id="x-menu")], className="dropdown")
+y_menu = html.Div(children=[html.Label("y-axis menu"), dcc.Dropdown(y_options, "Price", id="y-menu")], className="dropdown left")
+
+dropdowns = html.Div([x_menu, y_menu])
+
+# graph component
 graph = dcc.Graph(id="graph")
 
 refresh_button = html.Button("Refresh Data", id="rfs-btn")
@@ -55,7 +58,7 @@ initial_store["Timestamp"] = initial_store["Timestamp"].astype(str)
 
 # Dash app setup
 
-app = Dash(appName)
+app = Dash(__name__, title="EnergyExplorer")
 
 @callback(
     Output("y-menu", "value"),
@@ -110,11 +113,11 @@ def update_graph(store_data, x_axis, y_axis):
 
     return fig
 
-app.layout = html.Div([header, refresh_button, x_menu, y_menu, dcc.Store(id="df-store", data=initial_store.to_dict("records")), graph])
+app.layout = html.Div([header, refresh_button, dropdowns, dcc.Store(id="df-store", data=initial_store.to_dict("records")), graph])
 
-if appName == "dev":
+if socket["env"] == "dev":
     app.run(host=socket["IP"], port=socket["Port"], debug=True)
-if appName == "pre-prod":
+if socket["env"] == __name__:
     app.run(host=socket["IP"], port=socket["Port"], dev_tools_ui=False)
-if appName == "prod":
+if socket["env"] == "prod":
     serve(app.server, host=socket["IP"], port=socket["Port"])
