@@ -1,18 +1,20 @@
 from dash import Dash, html, dcc, Input, Output, callback, State, no_update
-import os
+import os, argparse
+from config import CONFIG
 import sqlite3 as sql
 import plotly.express as px
 import pandas as pd
 import numpy as np
 from waitress import serve
 
-# and socket values
-socket = {
-    "env": "dev", #dev, pre-prod, prod
-    "IP": "localhost",
-    "Port": 8080
-    }
+parser = argparse.ArgumentParser("EnergyExplorer")
+parser.add_argument('-m', choices=["dev", "pre-prod", "prod"])
+args = parser.parse_args()
 
+mode = args.m or os.environ.get("APP_MODE") or "dev"
+settings = CONFIG[mode]
+
+print(f"running {mode} environment")
 
 # SQL setup
 DB_Path = os.environ.get("DATABASE_PATH", "data/data.db")
@@ -115,9 +117,9 @@ def update_graph(store_data, x_axis, y_axis):
 
 app.layout = html.Div([header, refresh_button, dropdowns, dcc.Store(id="df-store", data=initial_store.to_dict("records")), graph])
 
-if socket["env"] == "dev":
-    app.run(host=socket["IP"], port=socket["Port"], debug=True)
-if socket["env"] == __name__:
-    app.run(host=socket["IP"], port=socket["Port"], dev_tools_ui=False)
-if socket["env"] == "prod":
-    serve(app.server, host=socket["IP"], port=socket["Port"])
+if mode == "dev":
+    app.run(host=settings["host"], port=settings["port"], debug=settings["debug"])
+if mode == "pre-prod":
+    app.run(host=settings["host"], port=settings["port"], dev_tools_ui=settings["dev_ui_tools"])
+if mode == "prod":
+    serve(app.server, host=settings["host"], port=settings["port"])
