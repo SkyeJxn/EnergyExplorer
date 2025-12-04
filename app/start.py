@@ -4,9 +4,10 @@ import sqlite3 as sql
 import plotly.express as px
 import pandas as pd
 import numpy as np
+from waitress import serve
 
-#app name (test, prod) and socket values
-appName = "test"
+#app name (dev, pre-prod, prod) and socket values
+appName = "dev"
 
 socket = {
     "IP": "localhost",
@@ -111,7 +112,9 @@ def update_graph(store_data, x_axis, y_axis):
 
 app.layout = html.Div([header, refresh_button, x_menu, y_menu, dcc.Store(id="df-store", data=initial_store.to_dict("records")), graph])
 
-if appName == "test":
+if appName == "dev":
     app.run(host=socket["IP"], port=socket["Port"], debug=True)
+if appName == "pre-prod":
+    app.run(host=socket["IP"], port=socket["Port"], dev_tools_ui=False)
 if appName == "prod":
-    app.run(host=socket["IP"], port=socket["Port"])
+    serve(app.server, host=socket["IP"], port=socket["Port"])
