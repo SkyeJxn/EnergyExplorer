@@ -53,13 +53,17 @@ y_options = {"Price": "Price",
             "Production" : "Production",
             "Ren_share": "Renewable Share of Energy"}
 
-x_menu = html.Div(children=[html.Label("x-axis menu"),dcc.Dropdown(x_options, "Timestamp", id="x-menu")], className="dropdown")
-y_menu = html.Div(children=[html.Label("y-axis menu"), dcc.Dropdown(y_options, "Price", id="y-menu")], className="dropdown left")
+x_menu = html.Div(children=[html.Label("x-axis menu"),dcc.Dropdown(x_options, "Timestamp", id="x-menu", clearable=False)], className="dropdown")
+y_menu = html.Div(children=[html.Label("y-axis menu"), dcc.Dropdown(y_options, "Price", id="y-menu", clearable=False)], className="dropdown left")
 
 dropdowns = html.Div([x_menu, y_menu])
 
 # graph component
-graph = dcc.Graph(id="graph")
+graph =dcc.Graph(id="graph", config={
+    "displayModeBar": True,
+    "displaylogo": False,
+    "modeBarButtonsToRemove": ["pan2d", "autoscale"]
+})
 
 refresh_button = html.Button("Refresh Data", id="rfs-btn")
 
