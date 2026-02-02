@@ -4,7 +4,6 @@ from config import CONFIG
 import sqlite3 as sql
 import plotly.express as px
 import pandas as pd
-import numpy as np
 from waitress import serve
 
 parser = argparse.ArgumentParser("EnergyExplorer")
@@ -37,15 +36,10 @@ def serve_layout():
     initial_store = df.copy()
     initial_store["Timestamp"] = initial_store["Timestamp"].astype(str)
     return html.Div([
-        header, refresh_button,
+        header,
         dropdowns,
-        dcc.Store(id="df-store", data=initial_store.to_dict("records")), graph])
-    
+        dcc.Store(id="df-store", data=initial_store.to_dict("records")), graph, pie])
 
-# UI components
-header = html.Div(html.H1("EnergyExplorer"), className="header")
-
-# Dropdown builder
 x_options = {"Timestamp":"Timestamp",
             "Ren_share": "Renewable Share of Energy"
             }
@@ -58,14 +52,21 @@ y_menu = html.Div(children=[html.Label("y-axis menu"), dcc.Dropdown(y_options, "
 
 dropdowns = html.Div([x_menu, y_menu])
 
-# graph component
+# UI components
+header = html.Div(html.H1("EnergyExplorer"), className="header")
+
+# graph components
 graph =dcc.Graph(id="graph", config={
     "displayModeBar": True,
     "displaylogo": False,
     "modeBarButtonsToRemove": ["pan2d", "autoscale"]
 })
 
-refresh_button = html.Button("Refresh Data", id="rfs-btn")
+pie = dcc.Graph(id="pie", style={"display":"none"}, config={
+    "displayModeBar": True,
+    "displaylogo": False,
+    "modeBarButtonsToRemove": ["pan2d", "autoscale"]
+})
 
 # Dash app setup
 
@@ -86,18 +87,9 @@ def restrict_y_menu(x_axis, curr_val):
         return no_update, False
 
 @callback(
-    Output("df-store", "data"),
-    Input("rfs-btn", "n_clicks")
-)
-
-def refresh_data(n_clicks):
-    new_df = build_data()
-    new_store = new_df.copy()
-    new_store["Timestamp"] = new_store["Timestamp"].astype(str)
-    return new_store.to_dict("records")
-
-@callback(
     Output("graph", "figure"),
+    Output("pie", "figure"),
+    Output("pie", "style"),
     Input("df-store", "data"),
     Input("x-menu", "value"),
     Input("y-menu", "value")
@@ -106,21 +98,29 @@ def refresh_data(n_clicks):
 def update_graph(store_data, x_axis, y_axis):
     prod_types = ["Biomass","Coal", "Hydro",
                   "Oil_Gas", "Others", "Solar",
-                  "Wind", "Total_Production"]
+                  "Wind"]
+    labeling = ["<10", "10-20", "20-30", "30-40","40-50","50-60","60-70",">70"]
     
     df_loc = pd.DataFrame(store_data)
 
     if (x_axis == "Ren_share"):
         df_loc["Ren_share"] = pd.to_numeric(df_loc["Ren_share"], errors="coerce")
-        agg = df_loc.groupby("Ren_share", as_index=False)["Price"].mean()
-        fig = px.bar(agg, x="Ren_share", y="Price", title="Correlation of Price and Share of renewable Energy")
+        df_loc["Ren_share_group"] = pd.cut(x=df_loc["Ren_share"], bins=[0,10,20,30,40,50,60,70,100], right=False, labels=labeling)
+        agg = df_loc.groupby("Ren_share_group", as_index=False)["Price"].mean()
+        fig = px.bar(agg, x="Ren_share_group", y="Price", title="Correlation of Price and Share of renewable Energy")
+        fig2 = None
+        pie_style = {"display":"none"}
     else:
         if (y_axis == "Production"):
-            fig = px.line(df_loc, x=x_axis, y=prod_types, title="Energy Production Over Time")
+            fig = px.line(df_loc, x=x_axis, y="Total_Production", title="Energy Production Over Time")
+            fig2 = px.pie(df_loc, prod_types, prod_types)
+            pie_style = {}
         else:
             fig = px.line(df_loc, x=x_axis, y=y_axis, title=f"{y_axis} Over Time")
+            fig2 = None
+            pie_style = {"display":"none"}
 
-    return fig
+    return fig, fig2, pie_style
 
 app.layout = serve_layout()
 
