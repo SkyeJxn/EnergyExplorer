@@ -49,7 +49,8 @@ prices{
 
 ## Visualisierung / GUI-Konzept 
 
-
+![preisanzeige](pricing.png)
+![produktionsanzeige](production.png)
 
 ## Architektur / Datenfluss 
 
