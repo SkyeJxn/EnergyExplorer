@@ -14,7 +14,7 @@ def get_local_ip():
 CONFIG = {
     "dev" : {
         "debug": True,
-        "host": "localhost",
+        "host": get_local_ip(),
         "port": 8080,
     },
     "pre-prod" : {
