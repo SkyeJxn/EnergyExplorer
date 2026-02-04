@@ -8,8 +8,7 @@ parser.add_argument('-i', action='store_true', help="Initial API call without ta
 parser.add_argument('-c', type=str, help="specify API", default="all", choices=["prod", "price", "all"])
 flags = parser.parse_args()
 
-# DB_Path = os.environ.get("DATABASE_PATH", "./data/data.db")
-DB_Path = "./data/testing.db"
+DB_Path = os.environ.get("DATABASE_PATH", "./data/data.db")
 price_link = "https://api.energy-charts.info/price?bzn=DE-LU"
 prod_link = "https://api.energy-charts.info/total_power?country=de"
  
