@@ -16,7 +16,7 @@ settings = CONFIG[mode]
 print(f"running {mode} environment")
 
 # SQL setup
-DB_Path = os.environ.get("DATABASE_PATH", "data/data.db")
+DB_Path = os.environ.get("DATABASE_PATH", "data/testing.db")
 
 def get_conn():
     return sql.connect(DB_Path)
@@ -96,15 +96,12 @@ def restrict_y_menu(x_axis, curr_val):
 )
 
 def update_graph(store_data, x_axis, y_axis):
-    labeling = ["<10", "10-20", "20-30", "30-40","40-50","50-60","60-70",">70"]
     
     df_loc = pd.DataFrame(store_data)
 
     if (x_axis == "Ren_share"):
-        df_loc["Ren_share"] = pd.to_numeric(df_loc["Ren_share"], errors="coerce")
-        df_loc["Ren_share_group"] = pd.cut(x=df_loc["Ren_share"], bins=[0,10,20,30,40,50,60,70,100], right=False, labels=labeling)
-        agg = df_loc.groupby("Ren_share_group", as_index=False)["Price"].mean()
-        fig = px.bar(agg, x="Ren_share_group", y="Price", title="Correlation of Price and Share of renewable Energy")
+        agg = df_loc.groupby("Ren_share_bin", as_index=False)["Price"].mean()
+        fig = px.bar(agg, x="Ren_share_bin", y="Price", title="Correlation of Price and Share of renewable Energy")
     else:
         if (y_axis == "Production"):
             fig = px.line(df_loc, x=x_axis, y="Total_Production", title="Energy Production Over Time")
@@ -122,25 +119,25 @@ def update_graph(store_data, x_axis, y_axis):
     Input("y-menu", "value")
 )
 def update_pie(store_data, timestamp, y_axis):
-    prod_types = ["Biomass","Coal", "Hydro",
-                  "Oil_Gas", "Others", "Solar",
-                  "Wind"]
-    
-    if timestamp and "points" in timestamp and len(timestamp["points"]) > 0:
-        x_value = timestamp["points"][0]["x"]
-    else:
-        x_value = None
+    prod_types = ["Biomass", "Coal", "Hydro", "Oil_Gas", "Others", "Solar", "Wind"]
+    pct_cols = [f"{ptype}_pct" for ptype in prod_types]
 
-    df_loc = pd.DataFrame(store_data).drop(columns=["Ren_share", "Price"])
+    df_loc = pd.DataFrame(store_data)
     df_loc["Timestamp"] = pd.to_datetime(df_loc["Timestamp"]).dt.strftime('%Y-%m-%d %H:%M')
 
-    timed = df_loc.loc[df_loc["Timestamp"] == x_value]
-
-    if (y_axis == "Production" and x_value != None):
+    if y_axis == "Production":
+        if timestamp and "points" in timestamp and len(timestamp["points"]) > 0:
+            x_value = timestamp["points"][0]["x"]
+            timed = df_loc.loc[df_loc["Timestamp"] == x_value]
+            values = [timed.iloc[0][col] for col in pct_cols]
+            title = f"Production Breakdown for {x_value}"
+        else:
+            values = [df_loc[col].mean() for col in pct_cols]
+            title = "Mean Production Breakdown"
         fig = px.pie(
             names=prod_types,
-            values=[timed.iloc[0][ptype] for ptype in prod_types],
-            title=f"Production Breakdown for {x_value}"
+            values=values,
+            title=title
         )
         style = {}
     else:
