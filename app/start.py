@@ -16,7 +16,7 @@ settings = CONFIG[mode]
 print(f"running {mode} environment")
 
 # SQL setup
-DB_Path = os.environ.get("DATABASE_PATH", "data/testing.db")
+DB_Path = os.environ.get("DATABASE_PATH", "data/data.db")
 
 def get_conn():
     return sql.connect(DB_Path)
@@ -24,7 +24,7 @@ def get_conn():
 # Data extraction function
 def build_data():
     with get_conn() as conn:
-        prod_data = pd.read_sql_query("SELECT * FROM production", conn)
+        prod_data = pd.read_sql_query("SELECT Timestamp, Biomass_pct, Coal_pct, Hydro_pct, Oil_Gas_pct, Others_pct, Solar_pct, Wind_pct, Total_Production, Ren_share, Ren_share_bin FROM production", conn)
         price_data = pd.read_sql_query("SELECT * FROM prices", conn)
     df = pd.merge(prod_data, price_data, on="Timestamp", how="inner")
 
@@ -100,6 +100,8 @@ def update_graph(store_data, x_axis, y_axis):
     df_loc = pd.DataFrame(store_data)
 
     if (x_axis == "Ren_share"):
+        bin_order = ["<10", "10-20", "20-30", "30-40", "40-50", "50-60", "60-70", ">70"]
+        df_loc["Ren_share_bin"] = pd.Categorical(df_loc["Ren_share_bin"], categories=bin_order, ordered=True)
         agg = df_loc.groupby("Ren_share_bin", as_index=False)["Price"].mean()
         fig = px.bar(agg, x="Ren_share_bin", y="Price", title="Correlation of Price and Share of renewable Energy")
     else:
