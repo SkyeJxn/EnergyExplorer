@@ -10,7 +10,7 @@ def data_fetch(url, sql_cursor, table, init = False):
         link = str.join("",[url, "&start=", last_found, "&end=", now])
         response = rq.get(link)
     else:
-        response = rq.get(url)
+        response = rq.get(f"{url}&start=1763679600")
     return response.json()
 
 def build_production_df(data, key_name, value_name, outer_key, index_name):
