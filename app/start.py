@@ -1,6 +1,6 @@
 from dash import Dash, html, dcc, Input, Output, callback, State, no_update
 import os, argparse
-from config import CONFIG
+from app.net_config import NET_CONFIG
 import sqlite3 as sql
 import plotly.express as px
 import pandas as pd
@@ -10,8 +10,12 @@ parser = argparse.ArgumentParser("EnergyExplorer")
 parser.add_argument('-m', choices=["dev", "pre-prod", "prod"])
 args = parser.parse_args()
 
+buttons = ["pan2d", "autoscale", "select",
+            "lasso", "toImage", "zoom2d", 
+            "zoomIn2d", "zoomOut2d", "resetScale2d"]
+
 mode = args.m or os.environ.get("APP_MODE") or "dev"
-settings = CONFIG[mode]
+settings = NET_CONFIG[mode]
 
 print(f"running {mode} environment")
 
@@ -46,7 +50,7 @@ x_options = {"Timestamp":"Timestamp",
             "Ren_share": "Renewable Share of Energy"
             }
 y_options = {"Price": "Price",
-            "Production" : "Production",
+            "Total_Production" : "Production",
             "Ren_share": "Renewable Share of Energy"}
 
 x_menu = html.Div(children=[html.Label("x-axis menu"),dcc.Dropdown(x_options, "Timestamp", id="x-menu", clearable=False, persistence=True, searchable=False)], className="dropdown")
@@ -61,13 +65,13 @@ header = html.Div(html.H1("EnergyExplorer"), className="header")
 graph =dcc.Graph(id="graph", className="graph", config={
     "displayModeBar": True,
     "displaylogo": False,
-    "modeBarButtonsToRemove": ["pan2d", "autoscale"]
-})
+    "modeBarButtonsToRemove": buttons
+    }, clear_on_unhover=True)
 
 pie = dcc.Graph(id="pie",className="graph" ,style={"display":"none"}, config={
     "displayModeBar": True,
     "displaylogo": False,
-    "modeBarButtonsToRemove": ["pan2d", "autoscale"]
+    "modeBarButtonsToRemove": buttons
 })
 
 # Dash app setup
@@ -103,13 +107,11 @@ def update_graph(store_data, x_axis, y_axis):
         bin_order = ["<10", "10-20", "20-30", "30-40", "40-50", "50-60", "60-70", ">70"]
         df_loc["Ren_share_bin"] = pd.Categorical(df_loc["Ren_share_bin"], categories=bin_order, ordered=True)
         agg = df_loc.groupby("Ren_share_bin", as_index=False)["Price"].mean()
-        fig = px.bar(agg, x="Ren_share_bin", y="Price", title="Correlation of Price and Share of renewable Energy")
+        fig = px.bar(agg, x="Ren_share_bin", y="Price", labels={
+            "Ren_share_bin": "Renewable Energy Share"
+        },title="Correlation of Price and Share of renewable Energy")
     else:
-        if (y_axis == "Production"):
-            fig = px.line(df_loc, x=x_axis, y="Total_Production", title="Energy Production Over Time")
-
-        else:
-            fig = px.line(df_loc, x=x_axis, y=y_axis, title=f"{y_axis} Over Time")
+        fig = px.line(df_loc, x=x_axis, y=y_axis, title=f"{y_axis} Over Time")
 
     return fig
 
@@ -117,7 +119,7 @@ def update_graph(store_data, x_axis, y_axis):
     Output("pie","figure"),
     Output("pie", "style"),
     Input("df-store", "data"),
-    Input("graph", "clickData"),
+    Input("graph", "hoverData"),
     Input("y-menu", "value")
 )
 def update_pie(store_data, timestamp, y_axis):
@@ -127,7 +129,7 @@ def update_pie(store_data, timestamp, y_axis):
     df_loc = pd.DataFrame(store_data)
     df_loc["Timestamp"] = pd.to_datetime(df_loc["Timestamp"]).dt.strftime('%Y-%m-%d %H:%M')
 
-    if y_axis == "Production":
+    if y_axis == "Total_Production":
         if timestamp and "points" in timestamp and len(timestamp["points"]) > 0:
             x_value = timestamp["points"][0]["x"]
             timed = df_loc.loc[df_loc["Timestamp"] == x_value]

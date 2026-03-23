@@ -1,5 +1,4 @@
 import socket
-import os
 
 def get_local_ip():
     try:
@@ -11,7 +10,7 @@ def get_local_ip():
     except:
         return "127.0.0.1"
     
-CONFIG = {
+NET_CONFIG = {
     "dev" : {
         "debug": True,
         "host": get_local_ip(),
