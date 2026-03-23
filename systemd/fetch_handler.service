@@ -3,7 +3,7 @@ Description=configuration file for API Execution
 
 [Service]
 Type=simple
-WorkingDirectory=/home/user/DV-Projekt/Backend #edit appropriately
+WorkingDirectory=/home/user/EnergyExplorer #edit appropriately
 ExecStart=/usr/bin/python3 fetch_handler.py
 Restart=no
 
