@@ -1,6 +1,6 @@
 from dash import Dash, html, dcc, Input, Output, callback, State, no_update
 import os, argparse
-from app.net_config import NET_CONFIG
+from net_config import NET_CONFIG
 import sqlite3 as sql
 import plotly.express as px
 import pandas as pd
