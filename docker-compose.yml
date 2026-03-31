@@ -1,9 +1,12 @@
+name: EnergyExplorer
+
 services:
-  energy_fetcher:
+
+  dashboard:
     build:
       context: .
-      dockerfile: docker/Dockerfile
-    container_name: energy_fetcher
+      dockerfile: docker/App_Dockerfile
+    container_name: dashboard
     volumes:
       - ./data:/data
     environment:
@@ -12,3 +15,16 @@ services:
     ports:
       - "8080:8080"
     restart: no
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Backend_Dockerfile
+    container_name: backend
+    volumes:
+      - ./data:/data
+    environment:
+      - DATABASE_PATH=/data/data.db
+      - FETCH_MIN_SLEEP_SECONDS=10800
+      - FETCH_MAX_SLEEP_SECONDS=14400
+    restart: unless-stopped
