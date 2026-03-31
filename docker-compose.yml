@@ -5,7 +5,7 @@ services:
   dashboard:
     build:
       context: .
-      dockerfile: docker/App_Dockerfile
+      dockerfile: docker/App.Dockerfile
     container_name: dashboard
     volumes:
       - ./data:/data
@@ -19,7 +19,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: docker/Backend_Dockerfile
+      dockerfile: docker/Backend.Dockerfile
     container_name: backend
     volumes:
       - ./data:/data
