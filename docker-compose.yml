@@ -3,6 +3,7 @@ name: EnergyExplorer
 services:
 
   dashboard:
+    platform: linux/arm/v7
     build:
       context: .
       dockerfile: docker/App.Dockerfile
@@ -17,6 +18,7 @@ services:
     restart: no
 
   backend:
+    platform: linux/arm/v7
     build:
       context: .
       dockerfile: docker/Backend.Dockerfile
