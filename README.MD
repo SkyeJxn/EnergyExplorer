@@ -1,14 +1,22 @@
 # EnergyExplorer
 
-## Motivation
+## Usage
 
+quickly visualizes Energy Data.
 
+## Requirements
 
-## Funktionen & Nutzung:
+- Docker
+- SQlite
 
-- Visualisierung von Produktionsdaten
-- Anwählbare datenpunkte:
-    x / y | Produktion nach Typ | Preis | Anteil erneuerbarer Energie
-    ----|---------------------|-------|----------------------------
-    Zeit| Ja | Ja | Ja
-    Anteil Erneuerbarer Energie | Nein | Ja | Nein
+## Installation
+
+``` bash
+git clone https://github.com/SkyeJxn/EnergyExplorer
+cd EnergyExplorer
+docker compose up --build
+```
+
+## Data Source
+
+The used Data is pulled from the [Energy Charts API](https://www.energy-charts.info/api.html?l=de&c=DE).
