@@ -1,3 +1,4 @@
+fastapi
 requests
 numpy==1.24.2
 pandas==1.5.3
