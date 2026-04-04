@@ -1,10 +1,9 @@
 from dash import Dash, html, dcc, Input, Output, callback, State, no_update
 import os, argparse
 from net_config import NET_CONFIG
-import sqlite3 as sql
 import plotly.express as px
-import pandas as pd
 from waitress import serve
+import requests as rq
 
 parser = argparse.ArgumentParser("EnergyExplorer")
 parser.add_argument('-m', choices=["dev", "pre-prod", "prod"])
@@ -20,31 +19,7 @@ settings = NET_CONFIG[mode]
 print(f"running {mode} environment")
 
 # SQL setup
-DB_Path = os.environ.get("DATABASE_PATH", "data/data.db")
-
-def get_conn():
-    return sql.connect(DB_Path)
-
-# Data extraction function
-def build_data():
-    with get_conn() as conn:
-        prod_data = pd.read_sql_query("SELECT Timestamp, Biomass_pct, Coal_pct, Hydro_pct, Oil_Gas_pct, Others_pct, Solar_pct, Wind_pct, Total_Production, Ren_share, Ren_share_bin FROM production", conn)
-        price_data = pd.read_sql_query("SELECT * FROM prices", conn)
-    df = pd.merge(prod_data, price_data, on="Timestamp", how="inner")
-
-    df["Timestamp"] = pd.to_datetime(df["Timestamp"], unit="s", dayfirst=True, origin="unix")
-    return df
-
-def serve_layout():
-    df = build_data()
-    initial_store = df.copy()
-    initial_store["Timestamp"] = initial_store["Timestamp"].astype(str)
-    return html.Div([
-        header,
-        dropdowns,
-        dcc.Store(id="df-store",data=initial_store.to_dict("records")),
-        html.Div([graph, pie], className="graph-box")
-        ])
+Backend = os.environ.get("BACKEND_URL", "http://127.0.0.1:8000")
 
 x_options = {"Timestamp":"Timestamp",
             "Ren_share": "Renewable Share of Energy"
@@ -94,54 +69,65 @@ def restrict_y_menu(x_axis, curr_val):
 
 @callback(
     Output("graph", "figure"),
-    Input("df-store", "data"),
     Input("x-menu", "value"),
     Input("y-menu", "value")
 )
 
-def update_graph(store_data, x_axis, y_axis):
-    
-    df_loc = pd.DataFrame(store_data)
-
+def update_graph(x_axis, y_axis):
     if (x_axis == "Ren_share"):
-        bin_order = ["<10", "10-20", "20-30", "30-40", "40-50", "50-60", "60-70", ">70"]
-        df_loc["Ren_share_bin"] = pd.Categorical(df_loc["Ren_share_bin"], categories=bin_order, ordered=True)
-        agg = df_loc.groupby("Ren_share_bin", as_index=False)["Price"].mean()
-        fig = px.bar(agg, x="Ren_share_bin", y="Price", labels={
-            "Ren_share_bin": "Renewable Energy Share"
+        data = rq.get(f"{Backend}/bins").json()
+        fig = px.bar(data, x="Bins", y="Price", labels={
+            "Bins": "Renewable Energy Share"
         },title="Correlation of Price and Share of renewable Energy")
     else:
-        fig = px.line(df_loc, x=x_axis, y=y_axis, title=f"{y_axis} Over Time")
+        if (y_axis == "Price"):
+            data = rq.get(f"{Backend}/prices").json()
+        elif (y_axis == "Total_Production"):
+            data = rq.get(f"{Backend}/production").json()
+        elif (y_axis == "Ren_share"):
+            data = rq.get(f"{Backend}/ren_share").json()
+        fig = px.line(data, x="Timestamp", y="Data", title=f"{y_axis} Over Time")
 
     return fig
 
 @callback(
     Output("pie","figure"),
     Output("pie", "style"),
-    Input("df-store", "data"),
     Input("graph", "hoverData"),
     Input("y-menu", "value")
 )
-def update_pie(store_data, timestamp, y_axis):
-    prod_types = ["Biomass", "Coal", "Hydro", "Oil_Gas", "Others", "Solar", "Wind"]
-    pct_cols = [f"{ptype}_pct" for ptype in prod_types]
-
-    df_loc = pd.DataFrame(store_data)
-    df_loc["Timestamp"] = pd.to_datetime(df_loc["Timestamp"]).dt.strftime('%Y-%m-%d %H:%M')
-
+def update_pie(timestamp, y_axis):
+    palette = {
+        "Biomass": "blue",
+        "Coal": "red",
+        "Hydro": "green",
+        "Oil & Gas": "purple",
+        "Others": "orange",
+        "Solar": "pink",
+        "Wind": "cyan"
+        }
+    
     if y_axis == "Total_Production":
         if timestamp and "points" in timestamp and len(timestamp["points"]) > 0:
             x_value = timestamp["points"][0]["x"]
-            timed = df_loc.loc[df_loc["Timestamp"] == x_value]
-            values = [timed.iloc[0][col] for col in pct_cols]
-            title = f"Production Breakdown for {x_value}"
+            data = rq.get(f"{Backend}/pie?x={x_value}").json()
         else:
-            values = [df_loc[col].mean() for col in pct_cols]
-            title = "Mean Production Breakdown"
+            data = rq.get(f"{Backend}/pie").json()
+
+        values_dict = data.get("values", {})
+        keys = list(values_dict.keys())
+        values = list(values_dict.values())
+        title = data.get("title", "Production Breakdown")
+        pie_data = {"name": keys, "value": values}
+
         fig = px.pie(
-            names=prod_types,
-            values=values,
-            title=title
+            pie_data,
+            names="name",
+            values="value",
+            color="name",
+            title=title,
+            color_discrete_map=palette,
+
         )
         style = {}
     else:
@@ -150,7 +136,11 @@ def update_pie(store_data, timestamp, y_axis):
     
     return fig, style
 
-app.layout = serve_layout()
+app.layout = html.Div([
+        header,
+        dropdowns,
+        html.Div([graph, pie], className="graph-box")
+        ])
 
 if mode == "dev":
     app.run(host=settings["host"], port=settings["port"], debug=settings["debug"])
