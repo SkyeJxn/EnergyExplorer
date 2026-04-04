@@ -1,9 +1,0 @@
-[Unit]
-Description=Execution handler to get new API data
-
-[Timer]
-OnBootSec=5min
-OnUnitActivateSec=3h
-
-[Install]
-WantedBy=timers.target
