@@ -1,10 +1,11 @@
+from API_fetch import price_fetch, prod_fetch
 import sqlite3 as sql
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 import pandas as pd
 import os
+from typing import Literal
 
 app = FastAPI()
-
 DB_Path = os.environ.get("DATABASE_PATH", "data/data.db")
 
 def get_conn():
@@ -78,3 +79,32 @@ async def pie(x: str = ""):
     
     return {"values": values,
             "title": title}
+
+@app.post("/fetch")
+async def fetch(init: bool = False, source: Literal["price", "prod", "all"] = "all"):
+    price_link = "https://api.energy-charts.info/price?bzn=DE-LU"
+    prod_link = "https://api.energy-charts.info/total_power?country=de"
+ 
+    with get_conn() as conn:
+        cur = conn.cursor()
+        try:
+            results = {}
+            if source in ("prod", "all"):
+                results["prod"] = prod_fetch(prod_link, conn, cur, init)
+            if source in ("price", "all"):
+                results["price"] = price_fetch(price_link, conn, cur, init)
+        finally:
+            cur.close()
+        failed = {key: value for key, value in results.items() if not value.get("ok", False)}
+        if failed:
+            raise HTTPException(
+                status_code=502,
+                detail={"message": "One or more fetch operations failed", "results": results},
+            )
+
+        conn.commit()
+        return {
+            "detail": "Fetch completed",
+            "source": source,
+            "results": results,
+        }
