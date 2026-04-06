@@ -2,6 +2,11 @@ import requests, time, os
 from datetime import datetime
 
 API = os.environ.get("API_URL")
+
+res = requests.post(f"{API}/fetch?init=True", timeout=120)
+
+time.sleep(14400)
+
 while (True):
     try:
         res = requests.post(f"{API}/fetch", timeout=120)
