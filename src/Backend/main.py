@@ -1,4 +1,4 @@
-from API_fetch import price_fetch, prod_fetch
+from src.Backend.API_fetch import price_fetch, prod_fetch
 import sqlite3 as sql
 from fastapi import FastAPI, HTTPException
 import pandas as pd

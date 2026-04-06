@@ -3,5 +3,5 @@ LABEL maintainer="Skye Jonczik <skye.jonczik@proton.me>"
 WORKDIR /app
 COPY docker/app/requirements.txt .
 RUN pip install -r requirements.txt
-COPY app/ ./app/
+COPY src/app/ ./app/
 CMD ["python", "app/start.py"]
