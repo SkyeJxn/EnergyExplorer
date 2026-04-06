@@ -7,10 +7,12 @@ services:
       dockerfile: docker/app/Dockerfile
     container_name: dashboard
     environment:
-      - BACKEND_URL=url
+      - BACKEND_URL=http://127.0.0.1:8000
       - APP_MODE=prod
     ports:
       - "8080:8080"
+    depends_on:
+      - api
     restart: no
 
   fetch:
@@ -19,7 +21,7 @@ services:
       dockerfile: docker/fetch/Dockerfile
     container_name: fetch
     environment:
-      - API_URL=http://api:8000
+      - API_URL=http://127.0.0.1:8000
     depends_on:
       - api
     restart: unless-stopped

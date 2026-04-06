@@ -2,3 +2,4 @@ dash
 plotly
 waitress
 requests
+numpy
