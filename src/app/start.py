@@ -6,7 +6,7 @@ from waitress import serve
 import requests as rq
 
 parser = argparse.ArgumentParser("EnergyExplorer")
-parser.add_argument('-m', choices=["dev", "pre-prod", "prod"])
+parser.add_argument('-d', choices=["dev", "pre-prod", "prod"])
 args = parser.parse_args()
 
 buttons = ["pan2d", "autoscale", "select",
