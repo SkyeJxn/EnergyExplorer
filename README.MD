@@ -14,6 +14,7 @@ quickly visualizes Energy Data.
 ``` bash
 git clone https://github.com/SkyeJxn/EnergyExplorer
 cd EnergyExplorer
+sqlite3 data/data.db ".read data/setup.sql"
 docker compose up --build
 ```
 
