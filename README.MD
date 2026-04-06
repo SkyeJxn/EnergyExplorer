@@ -36,6 +36,12 @@ sqlite3 data/data.db ".read data/setup.sql"
 python -m venv ./venv
 pip install -r src/requirements.txt
 python src/app/start.py -d dev
+```
+
+in a second terminal instance:
+
+```bash
+cd path/to/EnergyExplorer
 fastapi dev src/Backend/main.py
 ```
 
