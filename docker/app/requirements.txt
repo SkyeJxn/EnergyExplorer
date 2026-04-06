@@ -3,3 +3,4 @@ plotly
 waitress
 requests
 numpy
+pandas
