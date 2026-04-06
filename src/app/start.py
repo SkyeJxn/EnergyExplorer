@@ -13,7 +13,7 @@ buttons = ["pan2d", "autoscale", "select",
             "lasso", "toImage", "zoom2d", 
             "zoomIn2d", "zoomOut2d", "resetScale2d"]
 
-mode = args.m or os.environ.get("APP_MODE") or "dev"
+mode = args.d or os.environ.get("APP_MODE") or "dev"
 settings = NET_CONFIG[mode]
 
 print(f"running {mode} environment")
